@@ -32,3 +32,6 @@ plugins:
 
 disqus:
     shortname: vijaydaultaniblog
+
+# Google Analytics
+google_analytics: UA-85463938-2
