@@ -169,14 +169,13 @@ Cited as:
   author  = "Daultani, Vijay",
   journal = "https://github.com/vijaydaultani/blog",
   year    = "2021",
-  url     = "https://vijaydaultani.github.io/blog/2021/10/09/demystifying-attention.html"
+  url     = "https://vijaydaultani.github.io/blog/2021/10/08/demystifying-attention.html"
 }
 ```
 
 *If you notice mistakes and errors in this post, don't hesitate to contact me at [vijay dot daultani at gmail dot com] and I would be very happy to correct them!*
 
 See you in the next post :D
-
 
 ## References
 
