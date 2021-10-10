@@ -173,7 +173,7 @@ Cited as:
 }
 ```
 
-*If you notice mistakes and errors in this post, don't hesitate to contact me at [vijay dot daultani at Gmail dot com], and I would be pleased to correct them!*
+*If you notice mistakes and errors in this post, don't hesitate to contact me at [vijay dot daultani at gmail dot com], and I would be pleased to correct them!*
 
 See you in the next post :D
 
