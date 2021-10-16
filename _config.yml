@@ -1,8 +1,7 @@
-title: Vijay Daultani blog
+title: Vijay Daultani Blog
 author:
-  name: vijaydaultani
-# email: your-email@domain.com
-url: "https://vijaydaultani.github.io/blog/"
+  name: Vijay Daultani
+url: "https://vijaydaultani.github.io/blog"
 description: Reflection from a computer scientist
 
 show_excerpts: true # set to true to show excerpts on the homepage
