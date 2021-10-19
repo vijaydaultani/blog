@@ -28,7 +28,18 @@ In the paper they used transformer for the machine translation task but transfor
 
 
 ## Model Architecture
-Ok now let's formally define the problem. Given input sequence of symbol representations $$(x_1,...,x_n)$$ encoder will map that to a sequence of continious representations $$z = (z_1,...,z_n)$$. Later given $$z$$, the decoder then gnerates generates an output seque4nce $$(y_1,...,y_n)$$ of symbols one element at a time. 
+Ok now let's formally define the problem. Given input sequence of symbol representations $$(x_1,...,x_n)$$ encoder will map that to a sequence of continious representations $$z = (z_1,...,z_n)$$. Later given $$z$$, the decoder then gnerates generates an output sequence $$(y_1,...,y_n)$$ of symbols one element at a time. Similar to conventional encoder-decoder architecture the decoder was used in a autoregressive settings i.e. previously generated symbol was consumed as an input by the decoder to generate the next symbol.
+
+## Understanding the concept of key, query and value
+
+## 
+
+### Encoder and Decoder Stacks
+
+
+## Results
+In this article my motivation is not to showcase and promote how effecient the transfomers are. One can refer to the paper for the details of the results but since we are on the topic let's breifly talk about the improvement on the task at hand i.e. machine translation.
+
 
 
 ---
