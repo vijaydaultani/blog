@@ -15,6 +15,35 @@ tags: transformer encoder-decoder rnn
 ## Background
 Transduction is described as mapping an input string to an output string. Traditionally, sequence transduction models were based on encoder-decoder architectures where both of them were modeled via a recurrent or convolutional neural network. Soon after the encoder-decoder architecture was proposed by sutskever et al. in 2014 concept of attention was proposed by Bahandau in year 2016. Attention was used to condition each output symbol on a dynamic context vector. We described conventional encoder-decoder and attention in my previous article on demystifying attention here. Please read that article to get detailed understanding of the topic.
 
+## Why Self Attention
+
+## Breif model description
+
+We will come back on this at last once we have learned all the involved concepts
+
+## Embedding
+
+### I/P and O/P Embedding
+
+### Positional Encoding
+
+## Attention
+
+### Q, K, V Information Retrieval
+
+### Attention (Scaled dot attention)
+
+### Multi Head Attention
+
+### Masked Multi Head Attention
+
+### Multi Head Attention b/w encoder and decoder
+
+### Where is attention used in the model
+We used that in 3 places mentioned above
+
+## Pointwise Feed Forward N/W
+
 ## Limitations
 Limitation 1:  Though parallelization was possible across training examples using the concept of batching but not within one single example. RNN generate a sequence of hidden states $$h_t$$ as a function of previous hidden state $$h_{t-1}$$ and the input for position t. This inherent sequential nature to process input symbol one at a time in an order prevents parallelization within training examples. 
 
