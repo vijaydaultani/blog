@@ -6,7 +6,7 @@ excerpt: "This post will help demystify attention mechanism by presenting motiva
 date:   2021-10-08 17:00:00
 tags: attention encoder-decoder rnn
 ---
-> In this article, I will introduce the most common form of attention (also know as soft-attention or content-based attention), initially proposed by ([Bahdanau et al.](https://arxiv.org/abs/1409.0473)) to improve the performance of basic encoder-decoder architecture. I plan to write all different types of attention in a separate article, and therefore the goal of this article will not be to introduce various forms of attention and differentiate among them. Furthermore, in this article, I aim first to provide the motivation, followed by the relevant mathematical equations to help deepen the understanding of the topic.
+> In this article, I will introduce the most common form of attention (also know as soft-attention or additive attention), initially proposed by ([Bahdanau et al.](https://arxiv.org/abs/1409.0473)) to improve the performance of basic encoder-decoder architecture. I plan to write all different types of attention in a separate article, and therefore the goal of this article will not be to introduce various forms of attention and differentiate among them. Furthermore, in this article, I aim first to provide the motivation, followed by the relevant mathematical equations to help deepen the understanding of the topic.
 
 {: class="table-of-content"}
 * TOC
@@ -15,7 +15,7 @@ tags: attention encoder-decoder rnn
 ## Basic Encoder-Decoder Architecture
 A sequence to sequence model was first proposed by ([Sutskever, et al. 2014](https://proceedings.neurips.cc/paper/2014/file/a14ac55a4f27472c5d894ec1c3c743d2-Paper.pdf)) in the form of basic encoder-decoder architecture. They offered a first general end-to-end approach to sequence learning, i.e., mapping input sequence to target sequence. In a nutshell, an encoder takes a sequence in input and maps that into a context vector consumed by a decoder to generate a target sequence. 
 
-![seq-to-seq-using-decoder]({{ '/assets/images/seq-to-seq-using-attention-example.drawio.png' | relative_url }})
+![seq-to-seq-using-decoder]({{ '/assets/images/demystifying_attention/seq-to-seq-using-attention-example.drawio.png' | relative_url }})
 {: style="text-align: center"}
 *Fig. 1 Abstractive example of encoder-decoder architecture usage translating a English sentence "Better late then never" to Japanese "決して 遅く ない より 良い".*
 
@@ -109,7 +109,7 @@ So far, so good in the last paragraph, we saw what will be the implication of th
 
 The answer is an alignment model. This alignment model should help us determine to generate a target word $$ y_{j} $$, how important is each input word $$ x_{i} $$ (remember not just the immediate input word but a few neighboring words play a crucial role in generating each hidden representation). Concretely, as presented in below Fig.2 we want to know how *aligned*  the previous decoder hidden state $$ s_{j-1} $$ is to all of the other input hidden states $$ h_{i} $$. $$e_{ij}$$ in Fig.2 is also known as energy, is the alignment score between two input hidden states.
 
-![attention_block_diagram]({{ '/assets/images/attention-block-diagram.drawio.png' | relative_url }})
+![attention_block_diagram]({{ '/assets/images/demystifying_attention/attention-block-diagram.drawio.png' | relative_url }})
 {: style="text-align: center"}
 *Fig.2 Block diagram showing input and output to the alignment model. $$h_i$$ represents hidden state of the encoder from i-th timestep and $$s_{j-1}$$ represents the hidden state of the decoder from (j-1)-th timestep*
 
@@ -142,19 +142,19 @@ If you have followed me so far, now you should be able to realize that in \eqref
 
 To help us visualize better the series of steps involved in caulcating the dynamic context vector $$c_{j}$$ from all the encoder hidden states $$h_1, h_2, .. , h_{T_x}$$ and decoders previous hidden state $$s_{i-1}$$ refer the Fig. 3  below.
 
-![attention_calculation]({{ '/assets/images/attention-calculation.drawio.png' | relative_url }})
+![attention_calculation]({{ '/assets/images/demystifying_attention/attention-calculation.drawio.png' | relative_url }})
 {: style="text-align: center"}
 *Fig. 3 details how the dynamic context vector $$c_j$$ is calculated from encoder hidden state $$h_i$$ and previous decoder's hidden state $$s_{j-1}$$. $$i$$ and $$j$$ is used as an indexes for the encoder and decoder hidden states respectively.*
 
 Now that we have seen how to calculate the dynamic context vector $$c_j$$ in \eqref{eq:dynamic_context_vector}, let's substitute it's value back in \eqref{eq:attention_decoder_hidden_state} and finally in \eqref{eq:attention_decoder} to generate the distribution over the target words $$y_j$$. Below Fig. 4 helps us visualize the flow of information to first calculate decoder's current hidden state $$s_j$$, based on decoder's previous hidden state $$s_j-1$$ and dynamic context vector for current timestep $$c_j$$. Which later is used along with dynamic context vector $$c_j$$ and previous target word $$y_{j-1}$$ to generate final distribution over target word's probability for the current time step.
 
-![alignment-model-detailed]({{ '/assets/images/alignment-model-detailed.drawio.png' | relative_url }})
+![alignment-model-detailed]({{ '/assets/images/demystifying_attention/alignment-model-detailed.drawio.png' | relative_url }})
 {: style="text-align: center"}
 *Fig. 4 Steps to first calculate the decoder's hidden state $$s_j$$ and target word probability $$y_j$$*
 
 Below Fig. 5 shows all the components discussed so far together. It shows how the encoder hidden states and decoder hidden states together help determine the dynamic context vector, which later helps determine the distribution over the words in the target vocabulary. 
 
-![seq-to-seq-using-decoder]({{ '/assets/images/seq-to-seq-using-attention.drawio.png' | relative_url }})
+![seq-to-seq-using-decoder]({{ '/assets/images/demystifying_attention/seq-to-seq-using-attention.drawio.png' | relative_url }})
 {: style="text-align: center"}
 *Fig. 5 Sequence to Sequence Diagram using Attention Module in the Decoder*
 
