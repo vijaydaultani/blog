@@ -29,75 +29,33 @@ The authors employed the concept of self-attention that can relate different pos
 
 
 ## Problem Definition
-Ok now let's formally define the problem. Given input sequence of symbol representations $$(x_1,...,x_n)$$ encoder will map that to a sequence of continious representations $$z = (z_1,...,z_n)$$. Later given $$z$$, the decoder then gnerates generates an output sequence $$(y_1,...,y_n)$$ of symbols one element at a time. Similar to conventional encoder-decoder architecture the decoder was used in a autoregressive settings i.e. previously generated symbol was consumed as an input by the decoder to generate the next symbol.
+Ok now let's formally define the problem. Given an input sequence of symbol representations $$(x_1,...,x_n)$$ encoder will map that to a sequence of continious representations $$z = (z_1,...,z_n)$$. Later given $$z$$, the decoder then generates an output sequence $$(y_1,...,y_n)$$ of symbols. 
 
-## Why Self Attention
-Self attention was used because of the three desiredata. 
-1. Computation complexity per layer
+## Brief model description
 
-2. Amount of computation that can be parallelized which is measured as minimum number of sequential operations 
-
-3. Path length between long-range dependencies 
-
-## Breif model description
-
-To start with let's start with briefly explaining how does the model architecture for transformer looks like. As one should have noticed the whole architecture is splitted into two pieces encoder and decoder. In Transformer both encoder and decoder are organized into what is know as layers (also knows as blocks). Further each layer is composed for sublayers. Where on one hadn at encoder side each layer is composed of two sublayers, on the other hand each layer at decoder is composed of three sublayers. 
-
-
-Also, in case of encoder embeddings summed with positional encoding is given as an input to the encoder. Whereas on the decoder side outputs which are shifted right by one position are given as input to the decoder. Similar to encoder, at decoder side embeddings of words in the output are summed with their relevant positional encoding are further fed in the decoder side.
+There is a lot going on in the Transformers architecture in Fig.2  Let's start with briefly introducing one concept at a time. The whole architecture is splitted into two stacks, i.e. encoder stack on the left and decoder on the right. Further, each stack is organized into what is know as layers (also called as blocks). Though it is not apparent directly from Fig.2 but encoder stack consist of N (6 in paper) encoder layer stacked on top of each other. Similarly, decoder stack also consists of N (6 in paper) decoder layer stacked on top of each other. These multiple layers are not visible in the diagram for brewity. Next, each encoder and decoder layer is composed of sublayers. Encoder layer consist of two sublayers (multi-head attention and feed forward network) on contrary decoder layer consist of three sublayers (masked multi-head attention, multi-head attention and feed forward). You should notice the residual connections around each of the sublayer in encoder and decoder.
 
 <p align="center">
   <img width="500" src="/assets/images/demystifying_transformer/transformer_model_architecutre.jpg">
 </p>
-*Fig. 1 The Transfomer - model architecture.*
+*Fig. 2 The Transfomer - model architecture.*
 
+Next, you should observe that input embedding is added with positional encoding and feed as an input to the lowest encoder layer. Similary, output embedding added with positional embedding of output symbols is fed as an input to lowest decoder layer. Please notice a small difference on the decoder side where embeddings for output symbols are shifted right by one position before feeding as an input to decoder layer.  Moving forward you should notice the connection between encoder and decoder from the top of the encoder stack to multi-head attention sublayer of the decoder. How those connection work? well we will discuss that in detail later in this article. At last, there is linear layer on the top of decoder stack, further followed by the softmax layer to calculate the probability distribution for the output symbols. Given we have understood the big picture let's dive deep into understanding all the associated concepts in detail in order to be able to make sense of the complete architecture later.
 
-Given we have understood the big picture let's dive deep into understanding all the associated concepts in detail in order to be able to make sense of the complete architecture later.
+Though we will discuss all the components of the model in detail, but to really appreciate the simplicity and novelty of the model we need to take a step back and understand the concept of Query, Key and Value from Information Retrieval (IR).
 
-## Embedding
-
-### I/P and O/P Embedding
-As a common practise in sequence transduction models, the authors used learned embeddings to convert the input symbols and output symbols to vectors of dimension $$d_model$$. Also at the decoder side they learned the linear transformation and softmax function to be able to convert the decoders output to predict next-token probabilities.
-
-### Positional Encoding
-Since transformer process the sequence in parallel, essentially leading to no recurrence and no convolution operation. Still since we are processing the sequence which inherently have structure in it, therefore it is important to feed the seuqence information to the model. The authors do this by adding "positional embeddings" of the symbols to their relevant input embeddings and feed the summed up together version as an input to the bottom most layer of the input and decoder respectively. In the paper authors explored two different types of positional embeddings i.e. learned and fixed embedding. Apparently the authors found that both of the different types of embeddings works almost equal in performance. But the authors decided to go ahead with fixed embedding since it could easily scale on longer sequence of the input which was not seen in the training data.
-
-$$
-P E_{(p o s, 2 i)}=\sin \left(p o s / 10000^{2 i / d_{\text {model }}}\right)
-\label{eq:positional_encoding_sin}
-$$
-
-$$
-P E_{(\mathrm{pos}, 2 i+1)}=\cos \left(\text { pos } / 10000^{2 i / d_{\text {modcl }}}\right)
-\label{eq:positional_encoding_cos}
-$$
+## Query, Key, and Value
+Let's switch the gear a bit and let's discuss the most important concept of Query (Q), Key (K) and Value (V). This concept of Q, K, and V is inspired from their usage in IR. To give you motivation of the terminologies let's consider an example of web search for an interested topic (e.g. bitcoin). The first step for the web search is to insert our Query (i.e. bitcoin) in the search engine such as google. Then behind the scenes google search engine will match the input query against database of all Keys for e.g. documents title. At last the documents whose keys (i.e. document title) matches with the input Query are then ranked to show the most relevant Values (for e.g. document content) on the top of the search results. Off course the web search is more complicated than then presented in above few lines, but the goal here is to give you the motivation behind the terms Q, K and V rather than explaining the detailed working of a web search. 
 
 ## Attention
-An attention function can be described as mapping a query and a key-value pairs to an output, where all query, key, value and output are vectors. The output is computed as a weighted sum of the values, where the weight assigned to each value is computed using a compatibility function of the query with the corresponding key.
+Given we know the motivation of Query, Key and Value, let's recall an independent and important concept of attention. You can learn in detail about the concept of attention in my previous article of [Demystifying Attention!](https://vijaydaultani.github.io/blog/2021/10/08/demystifying-attention.html). In essence the motivation of attention is to determine how related an input and output symbol are. We calculated this relatedness between the input and output symbol indirectly by using the corresponding hidden states as a proxy to calculate the relatedness between two symbols. Once we have calculated this relatedness between one output symbol and all input symbols, we normalize this relatedness using a softmax function to generate normalized attention scores. In essence, the attention score told us the distribution of importance over input symbols to generate a output symbol.
 
-In order to understand the concept of the attention it is required to few important concepts as below
+In case of transformer we will unite the two concepts of attention and Q, K, V together. An attention function in case of transformer can be described as mapping a Query (i.e. output symbol) and a Key-Value (i.e. input symbol) pairs to an output. All query, key, value and output are vectors. The output of an attention function is computed as a weighted sum of the values, where the weight assigned to each value is computed using a compatibility function of the query with the corresponding key.
 
-### Q, K, V Information Retrieval
-This concept comes from information retrireval. Think of how any information retrieval system, e.g. google search engine might be working. Whenever you insert any query, google search engine essentially matches the inserted query against serveral keys (documents title). And then the documents whose keys matches with the inputted query are then ranked to show the most relevant values (in this case actual documents) on the top of the search results. 
+![attention_block_diagram]({{ '/assets/images/demystifying_attention/attention-block-diagram.drawio.png' | relative_url }})
+{: style="text-align: center"}
+*Fig.3 Block diagram showing input and output to the alignment model. $$h_i$$ represents hidden state of the encoder from i-th timestep and $$s_{j-1}$$ represents the hidden state of the decoder from (j-1)-th timestep*
 
-Similarly, we have concepts of query Q, key K, and value V here in transformer. 
-
-If you remember the original content based attention concept introduced by Bahandau the attention score was computed by a simple FFNN. And it was computed based on the below equation
-
-$$
-e\left(s_{j-1}, h_{i}\right)=v_{a}^{\top} \tanh \left(W_{a} s_{j-1}+U_{a} h_{i}\right)
-\label{eq:attention_score}
-$$
-
-Where $$h_i$$ is the hidden state from encoder and $$s_{j-1}$$ is the hidden state from decoder. The problem with the above formulation of the attention score is that if there are m input symbols and n output symbols the one need to compute the attention scores by running through the network $$m * n$$ number of times to find the compatibility between hidden states of encoder and decoder. This is expensive since we have to run through the FFNN network $$m* * n$$ number of times. 
-
-Rather in case of transformer they first transform both the input and output symbold into a common space and then rather than relying on a computational heavy function such as FFNN they calculate the compatibility by simply using a dot product to calculate the compatibility.
-
-The given description on the stackexcahnge of that the query is only from the decoder side and key is from the encoder side is not completely correct as we also have multi head attention both only within the encoder and also within the decoder side. 
-
-Said that there are multiple types of attention score such as described below. Below show the most common form of attention. 
-
-### Attention (Scaled dot attention)
 Out of all different types of attention the authors of the paper decided to use a variation of dot product known as scaled dot product attention. They call it scaled because once the dot product is caculate it is divided by $$\sqrt{d_{k}}$$. Where input consist of query and key of dimension $$d_{k}$$. The reason we do scaling is beacuse when we multiply query and key together the output product can be large in magnitude and therefore have to divide it with $$\sqrt{d_{k}}$$ to scale. If you have question why do we divide by $$\sqrt{d_{k}}$$ remember both query and key are of same dimension i.e. made sense to involve some variation of $$d_{d}$$ but why specifically $$\sqrt{d_{k}}$$, the authors didn't provide any insight. Atlast we take softmax of the product between query and key in order to get relative weight distribution across keys. Finally values are weighted by the output of compatibility calculated between query and key. 
 
 
@@ -107,6 +65,25 @@ $$
 \operatorname{Attention}(Q, K, V)=\operatorname{softmax}\left(\frac{Q K^{T}}{\sqrt{d_{k}}}\right) V
 \label{eq:scaled_dot_attention}
 $$
+
+
+## Self-Attention
+Now let's understand how does the concept of Q, K, V and attention together relates to the concept of self-attention in Transformer.
+
+>Self-attention, sometimes called intra-attention is an attention mechanism relating different positions of a single sequence in order to compute a representation of the sequence.
+
+As the definition suggests in self-attention we relate all the symbols within a sequence against each other. Again as the word relate suggests what we are interested in calculating is how compatible two symbols are. 
+
+Well now you know the inspiration for the terms Query, Key and Value in the Transformer architecture. Though in case of transformer there is a very subtle difference for the usage of Q, K and V from our previous example of web search. In case of transformer all three i.e. Q, K and V can be all same (intra encoder self-attention and intra decoder self-attention) or K, V can be same but different from Q (inter encoder-decoder attention). 
+
+## Where is attention used in the model
+If you followed me till now you would have realized that we used attention in total of three places in the transformer architecture. 
+
+First, within the encoder in the form of encoder self-attention. Well within self-attention layer all of the inputs i.e. queries, keys and values come from the same place, i.e. the output of the previous layer in the encoder.
+
+Second, within the decoder in the form of decoder self-attention. Similar to self-attention in encoder's case all of the inputs i.e. queries, keys and values come from the same place, i.e. the output of the previous layer in the decoder.
+
+Third, encoder-decoder attention layers. In this case different from self-attention case in encoder and decoder, the queries come from the previous decoder layer, and keys and values come from the output of the encoder. This connection between encoder and decoder allows the queries from decoder to attend all positions in the input sequence and works similar to  attention mechanism in case of a conventional encoder-decoder architecture.
 
 ### Multi Head Attention
 Rather than using single attention model with $$d_{model}$$ dimensional queries, keys and values, the authors found it was beneficial to linearly project the queries, keys and values h times with different learned linear  projecttions to $$d_{k}$$, $$d_{k}$$, and $$d_{v}$$ dimensions respectively. Multi head attentin allows model to jointly attend to information from different representative subspaces at different points. 
@@ -128,14 +105,42 @@ In \eqref{eq:multi_head_attention} observe that the final multi head attention o
 #### Masked Multi Head Attention
 To the output from the product of query and key we apply a mask. In case of encoder self-attention this mask is used to mask out the padding values so that they don't participate in attention calculation. Similar to self-attention in encoder a mask is applied to the output of self-attention of decoder, but on contarary to encoder in case of decoder the motivation of applying the mask is to hide the future tokens so that they don't interfere with calculating attention scores for self-attention. 
 
-### Where is attention used in the model
-If you followed me till now you would have realized that we used attention in total of three places in the transformer architecture. 
+Please notice similar to conventional encoder-decoder architecture the decoder was used in a autoregressive settings i.e. previously generated symbol was consumed as an input by the decoder to generate the next symbol.
 
-First, within the encoder in the form of encoder self-attention. Well within self-attention layer all of the inputs i.e. queries, keys and values come from the same place, i.e. the output of the previous layer in the encoder.
+## Efficiency
+If you remember the original content based attention concept introduced by Bahandau the attention score was computed by a simple FFNN. And it was computed based on the below equation
 
-Second, within the decoder in the form of decoder self-attention. Similar to self-attention in encoder's case all of the inputs i.e. queries, keys and values come from the same place, i.e. the output of the previous layer in the decoder.
+$$
+e\left(s_{j-1}, h_{i}\right)=v_{a}^{\top} \tanh \left(W_{a} s_{j-1}+U_{a} h_{i}\right)
+\label{eq:attention_score}
+$$
 
-Third, encoder-decoder attention layers. In this case different from self-attention case in encoder and decoder, the queries come from the previous decoder layer, and keys and values come from the output of the encoder. This connection between encoder and decoder allows the queries from decoder to attend all positions in the input sequence and works similar to  attention mechanism in case of a conventional encoder-decoder architecture.
+Where $$h_i$$ is the hidden state from encoder and $$s_{j-1}$$ is the hidden state from decoder. The problem with the above formulation of the attention score is that if there are m input symbols and n output symbols the one need to compute the attention scores by running through the network $$m * n$$ number of times to find the compatibility between hidden states of encoder and decoder. This is expensive since we have to run through the FFNN network $$m* * n$$ number of times. 
+
+Rather in case of transformer they first transform both the input and output symbol into a common space and then rather than relying on a computational heavy function such as FFNN they calculate the compatibility by simply using a dot product to calculate the compatibility.
+
+Said that there are multiple types of attention score such as described below. Below show the most common form of attention. 
+
+
+Now that we have understood the most crucial concept introduced in the paper of transformer i.e. self-attention let's move on to understand the rest of the components.
+
+## Embedding
+
+### I/P and O/P Embedding
+As a common practise in sequence transduction models, the authors used learned embeddings to convert the input symbols and output symbols to vectors of dimension $$d_model$$. Also at the decoder side they learned the linear transformation and softmax function to be able to convert the decoders output to predict next-token probabilities.
+
+### Positional Encoding
+Since transformer process the sequence in parallel, essentially leading to no recurrence and no convolution operation. Still since we are processing the sequence which inherently have structure in it, therefore it is important to feed the seuqence information to the model. The authors do this by adding "positional embeddings" of the symbols to their relevant input embeddings and feed the summed up together version as an input to the bottom most layer of the input and decoder respectively. In the paper authors explored two different types of positional embeddings i.e. learned and fixed embedding. Apparently the authors found that both of the different types of embeddings works almost equal in performance. But the authors decided to go ahead with fixed embedding since it could easily scale on longer sequence of the input which was not seen in the training data.
+
+$$
+P E_{(p o s, 2 i)}=\sin \left(p o s / 10000^{2 i / d_{\text {model }}}\right)
+\label{eq:positional_encoding_sin}
+$$
+
+$$
+P E_{(\mathrm{pos}, 2 i+1)}=\cos \left(\text { pos } / 10000^{2 i / d_{\text {modcl }}}\right)
+\label{eq:positional_encoding_cos}
+$$
 
 ## Pointwise Feed Forward N/W
 The last sublayer (second for encoder and third for decoder) in each layer of both encoder and decoder is a feed forward sublayer which is a fully connected feed forward network. The network is applied on each position in the input separately and identically. The fully connected layer as described in \eqref{eq:fully_connected} consists of two linear transformations separated by non linearity activation (ReLU) in between.
