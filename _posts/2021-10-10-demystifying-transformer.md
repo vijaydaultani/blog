@@ -35,10 +35,9 @@ Ok now let's formally define the problem. Given an input sequence of symbol repr
 
 There is a lot going on in the Transformers architecture in Fig.2  Let's start with briefly introducing one concept at a time. The whole architecture is splitted into two stacks, i.e. encoder stack on the left and decoder on the right. Further, each stack is organized into what is know as layers (also called as blocks). Though it is not apparent directly from Fig.2 but encoder stack consist of N (6 in paper) encoder layer stacked on top of each other. Similarly, decoder stack also consists of N (6 in paper) decoder layer stacked on top of each other. These multiple layers are not visible in the diagram for brewity. Next, each encoder and decoder layer is composed of sublayers. Encoder layer consist of two sublayers (multi-head attention and feed forward network) on contrary decoder layer consist of three sublayers (masked multi-head attention, multi-head attention and feed forward). You should notice the residual connections around each of the sublayer in encoder and decoder.
 
-<p align="center">
-  <img width="500" src="/assets/images/demystifying_transformer/transformer_model_architecutre.jpg">
-</p>
-*Fig. 2 The Transfomer - model architecture.*
+![transfomer-model-architecture]({{ '/assets/images/demystifying_transformer/transformer_model_architecutre.jpg' | relative_url }})
+{: style="text-align: center"}
+*Fig. 2 The Transfomer - model architecture*
 
 Next, you should observe that input embedding is added with positional encoding and feed as an input to the lowest encoder layer. Similary, output embedding added with positional embedding of output symbols is fed as an input to lowest decoder layer. Please notice a small difference on the decoder side where embeddings for output symbols are shifted right by one position before feeding as an input to decoder layer.  Moving forward you should notice the connection between encoder and decoder from the top of the encoder stack to multi-head attention sublayer of the decoder. How those connection work? well we will discuss that in detail later in this article. At last, there is linear layer on the top of decoder stack, further followed by the softmax layer to calculate the probability distribution for the output symbols. Given we have understood the big picture let's dive deep into understanding all the associated concepts in detail in order to be able to make sense of the complete architecture later.
 
