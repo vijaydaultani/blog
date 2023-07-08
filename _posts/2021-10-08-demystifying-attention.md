@@ -39,7 +39,7 @@ c=q\left(\left\{h_{1}, \cdots, h_{T_{x}}\right\}\right)
 \label{eq:context_vector}
 $$
 
-The obvious next question is, what is a good choice of this function $$ q $? Well in ([Sutskever, et al. 2014](https://proceedings.neurips.cc/paper/2014/file/a14ac55a4f27472c5d894ec1c3c743d2-Paper.pdf)) they proposed a logically simple function for $$ q $$ described in \eqref{eq:encoder_context_vector}. In essence, they decided to encode variable-length input sequence into a fixed-length vector based on the last encoded representation i.e. $$ h_{T_x} $$.
+The obvious next question is, what is a good choice of this function $$ q $$ ? Well in ([Sutskever, et al. 2014](https://proceedings.neurips.cc/paper/2014/file/a14ac55a4f27472c5d894ec1c3c743d2-Paper.pdf)) they proposed a logically simple function for $$ q $$ described in \eqref{eq:encoder_context_vector}. In essence, they decided to encode variable-length input sequence into a fixed-length vector based on the last encoded representation i.e. $$ h_{T_x} $$.
 
 $$
 c=q=h_{Tx}
