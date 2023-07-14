@@ -31,7 +31,11 @@ Formally our goal is to learn an encoder and decoder such that, given an input s
 
 ## Brief model description
 
-A lot is happening in the Transformers architecture in Fig.2. Let's briefly introduce one concept at a time. The architecture is split into two stacks, i.e., the encoder stack on the left and the decoder on the right. Further, each stack is organized into what is known as layers (also called blocks). Though it is not apparent directly from Fig.2, encoder and decoder stacks consist of **N** (6 in paper) layers stacked on top of each other. These multiple layers are not visible in the diagram for brevity. Next, each encoder and decoder layer is composed of sublayers. The encoder layer comprises two sublayers (**Multi-Head Attention** and **Feed Forward** network). The decoder layer consists of one additional sub-layer, i.e., Masked Multi-Head Attention; therefore, a total of three sublayers (**Masked Multi-Head Attention**, **Multi-Head Attention**, and **Feed Forward** network). You should notice the residual connections around each of the sublayers in the encoder and decoder.
+A lot is happening in the Transformers architecture in Fig.2. Let's briefly introduce one concept at a time. The architecture is split into two stacks, i.e., the encoder stack on the left and the decoder on the right. Further, each stack is organized into what is known as layers (also called blocks). Though it is not apparent directly from Fig.2, encoder and decoder stacks consist of **N** (6 in paper) layers stacked on top of each other. These multiple layers are not visible in the diagram for brevity. 
+
+Each layer in an encoder consists of two sublayers. The first sublayer is **Multi-Head Attention**, and the second is a simple position-wise **Feed Forward Neural Network**. Each of the two sublayers has residual connections, followed by layer normalization. 
+
+Decoder, similar to the encoder side, is composed of 6 identical layers stacked on top of each other. Different from its encoder counterpart, each layer in the decoder consists of three sublayers **Masked Multi-Head Attention**, **Multi-Head Attention**, and position-wise **Feed Forward Neural Network** network. Like its encoder counterpart, each sublayer has a residual connection followed by layer normalization. Finally, towards the end of the decoder, we linearly transform the decoder output, which is then passed through a softmax to generate the probabilities on the set of output symbols.
 
 ![transfomer-model-architecture]({{ '/assets/images/demystifying_transformer/transformer_model_architecutre.jpg' | relative_url }}){: width="400" }
 {: style="text-align: center"}
@@ -114,10 +118,10 @@ Instead, in the case of a transformer, authors first transform both the input an
 ## Embedding
 
 ### I/P and O/P Embedding
-As a common practise in sequence transduction models, the authors used learned embeddings to convert the input symbols and output symbols to vectors of dimension $$d_{model}$$. Also at the decoder side they learned the linear transformation and softmax function to be able to convert the decoders output to predict next-token probabilities.
+As a common practice in sequence transduction models, the authors used learned embeddings to convert the input and output symbols to vectors of dimension $$d_{model}$$. Later, the linear transformation and softmax function were learned to convert the decoder output to predict next-token probabilities.
 
 ### Positional Encoding
-Since transformer process the sequence in parallel, essentially leading to no recurrence and no convolution operation. Still since we are processing the sequence which inherently have structure in it, therefore it is important to feed the seuqence information to the model. The authors do this by adding "positional embeddings" of the symbols to their relevant input embeddings and feed the summed up together version as an input to the bottom most layer of the input and decoder respectively. In the paper authors explored two different types of positional embeddings i.e. learned and fixed embedding. Apparently the authors found that both of the different types of embeddings works almost equal in performance. But the authors decided to go ahead with fixed embedding since it could easily scale on longer sequence of the input which was not seen in the training data.
+Since the transformer processes a sequence in parallel, it leads to no recurrence and no convolution operation. However, we are processing a sequence, which inherently has a structure in it. This structure information is important, and therefore, the author feeds the position information to capture the sequence's structure. The authors do this by adding "positional embeddings" of the symbols to their relevant input embeddings and feeding the summed-up version as an input to the bottommost layer of the encoder and decoder, respectively. In the paper, authors explored two different types of positional embeddings, i.e., learned and fixed embedding. The authors found that both of the different types of embeddings work equally well in practice. However, the authors decided to go ahead with fixed embedding as described in equation \eqref{eq:positional_encoding_sin} and \eqref{eq:positional_encoding_cos} since it could quickly scale on the longer input sequence, not seen in the training data.
 
 $$
 P E_{(p o s, 2 i)}=\sin \left(p o s / 10000^{2 i / d_{\text {model }}}\right)
@@ -130,37 +134,21 @@ P E_{(\mathrm{pos}, 2 i+1)}=\cos \left(\text { pos } / 10000^{2 i / d_{\text {mo
 $$
 
 ## Pointwise Feed Forward N/W
-The last sublayer (second for encoder and third for decoder) in each layer of both encoder and decoder is a feed forward sublayer which is a fully connected feed forward network. The network is applied on each position in the input separately and identically. The fully connected layer as described in \eqref{eq:fully_connected} consists of two linear transformations separated by non linearity activation (ReLU) in between.
+The last sublayer of each layer for both the encoder and decoder is a fully connected feed-forward network sublayer. This network is applied to each dimension of the input vector separately and identically. However, one should note that though the same FFNN function is applied across different dimensions of the input vector, each layer uses different parameters for FFNN. The fully connected layer, as described in \eqref{eq:fully_connected}, consists of two linear transformations separated by nonlinearity activation (ReLU) in between.
 
 $$
 \operatorname{FFN}(x)=\max \left(0, x W_{1}+b_{1}\right) W_{2}+b_{2}
 \label{eq:fully_connected}
 $$
 
-One thing to notice is that though the FFN function is same across different positions, each layer uses different parameters.
-
-## Revisiting Model Architecture 
-Given we have already covered required relevant background about embeddings, attention, multi-head attention, and pointwise feed forward network now it's time to tie up all the concepts together in the form of the
-
-### Encoder and Decoder Stacks
-Encoder is composed of 6 identical layers stacked on top of each other. Each layer consist of two sublayers. First sublayer is multi-head self-attention and second sublayer is a simple position-wise fully connected feed-forward network. Each of the two sublayers have residual connections, followed by layer normalization.
-
-Decoder similar to encoder is composed of six identical layers stacked on top of each other. Different from it's encoder counterpart each layer in decoder consist of three sublayers. First sublayer is a masked multi-head self-attention, followed by second sublayer of multi-head encoder-decoder attention, which is finally followed by position-wise fully connected feed-forward network. Similar to it's encoder counterpart each sublayer have a residual connection which is followed by the layer normalization.
-
-Finally toward the end of the decoder we linearly transform the output of the decoder which is then passed through a softmax to generate the probabilities on set of output symbols.
-
 ## Summary
-Now that we have already understood all the required concepts, let's tie them together. To revise we started with the motivation for the embedding where we discussed both I/P, O/P and positional embeddings. Later we introduced the attention mechanism. Which was further broken down into the several sub concepts. To understand 
+To revise, we first revisited the limitations of the conventional RNNs. One of the traditional RNNs' most severe limitations is the sequential processing of a single input and output sequence, i.e., the inability to parallelize the calculation of the hidden representation of a given input and output sequence. Then we discussed how transformer architecture solves this problem, followed by the underlying concepts like Query, Key, and Value, different types of attention, and their usage in the architecture. Moving forward, we discussed the efficiency in a number of computations for dependency calculation of decoder symbols on encoder symbols. Ay last, we discussed embeddings (I/O and Positional embeddings) and Point-Wise Feed Forward Neural Networks.
 
-**Attention** became an integral part of several sequence modelling and transduction model for various tasks. I wrote an article on Attention previously which you can find here. Though in the article we went through in detail about the bottleneck problem of conventional encoder-decoder. But to summarize it here when encoder squashed the complete input into a one single vector the information was lost and decoder had no way to realize the importance of different inputs for generating symbol at hand especially for long-range dependencies. And therefore attention mechanism was introduced to allow modelling on input dependencies irrespective of the input's symbol distance in input and output sequences.
+**Attention** became an integral part of several sequence modeling and transduction model for various tasks. I wrote an article on attention previously, which you can find here. Though in the article, we went through in detail the bottleneck problem of conventional encoder-decoder. But to summarize it here, when the encoder squashed the complete input into a single vector, the information was lost, and the decoder had no way to realize the importance of different inputs for generating the symbols at hand, especially for long-range dependencies. And therefore attention mechanism was introduced to allow modeling of input dependencies irrespective of the input's symbol distance in input and output sequences.
 
-**Self-Attention** also called intra-attention is an attention mechanism that relates different position of a single sequence in order to compute a representation of the sequence. Notice the similarity with the conventional encoder. Similar to encoder self-attention is computing a representation of the sequence but rather than processing the input tokens one at a time self-attention will process them in parallel. Second self-attention similar to attention will relate (find similarity similar to attention function) different positions of a single sequence.
+**Self-Attention**, also called intra-attention, is an attention mechanism that relates the different positions of a single sequence in order to compute a representation of the sequence. Notice the similarity with the conventional encoder. Similar to the encoder, self-attention is computing a representation of the sequence, but rather than processing the input tokens one at a time, self-attention will process them in parallel. Second, self-attention similar to attention will relate (find similarity similar to attention function) different positions of a single sequence.
 
-**Transformer** was the first model which was completely based on self-attention in order to compute the representations of it's input and output without using any sequence aligned RNNs or CNNs. 
-
-In the paper they used transformer for the machine translation task but transformer itself is a very general architecture that can be used for any sequence modelling and transductions tasks.
-
-
+**Transformer** was the first model based entirely on self-attention to compute the representations of its input and output without using any sequence-aligned RNNs or CNNs. Though in the paper, authors evaluated the transformer on machine translation task, the transformer itself is a general architecture that can be used for any sequence modeling and transduction tasks.
 
 ---
 
@@ -175,7 +163,7 @@ Cited as:
 }
 ```
 
-*If you notice mistakes and errors in this post, don't hesitate to contact me at [vijay dot daultani at gmail dot com], and I would be pleased to correct them!*
+*If you notice mistakes and errors in this post, don't hesitate to contact me at in the chat section below, and I would be pleased to correct them!*
 
 See you in the next post :D
 
