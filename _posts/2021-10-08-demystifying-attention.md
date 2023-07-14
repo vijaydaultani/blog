@@ -111,7 +111,7 @@ The answer is an alignment model. This alignment model should help us determine 
 
 ![attention_block_diagram]({{ '/assets/images/demystifying_attention/attention-block-diagram.drawio.png' | relative_url }})
 {: style="text-align: center"}
-*Fig.2 Block diagram showing input and output to the alignment model. $$h_i$$ represents hidden state of the encoder from i-th timestep and $$s_{j-1}$$ represents the hidden state of the decoder from (j-1)-th timestep*
+*Fig.2 Block diagram showing input and output to the alignment model. $$h_i$$ represents hidden state of the encoder from i-th timestep and $$s_{j-1}$$ represents the hidden state of the decoder from (j-1)-th timestep. $$e_ij$$ represents the alignment/compatibility between encoder and decoder hidden states.*
 
 Now the obvious question is, what is this alignment model? Well ([Bahdanau et al.](https://arxiv.org/abs/1409.0473)) decided to use a simple feed-forward neural network for this alignment model, which is further described in \eqref{eq:attention_score}. The alignment model will be called $$T_{x} \times T_{y} $$ number of times to generate the alignment scores between all $$h_i$$ and $$s_{j-1}$$. Due to this high time complexity, the authors in ([Bahdanau et al.](https://arxiv.org/abs/1409.0473)) chose a simple model for alignment.
 
